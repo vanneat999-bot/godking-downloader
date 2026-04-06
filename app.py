@@ -2,68 +2,56 @@ import streamlit as st
 import yt_dlp
 import os
 
-# ការកំណត់រូបរាងវេបសាយ
+# ការកំណត់រូបរាង (Ultimate King Style)
 st.set_page_config(page_title="GODKING DOWNLOADER", page_icon="👑", layout="centered")
 
 st.markdown("""
     <style>
-    .main { background-color: #0E1117; }
-    h1 { color: #FF4B4B; text-align: center; text-shadow: 2px 2px #000; font-family: 'Arial'; }
-    p { color: #FAFAFA; text-align: center; }
-    div.stButton > button:first-child {
-        width: 100%;
-        height: 50px;
-        background-color: #262730;
-        color: white;
-        border: 2px solid #FF4B4B;
-        border-radius: 15px;
-        font-weight: bold;
+    .stApp { background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e); color: white; }
+    h1 { text-align: center; color: #FF4B4B; text-shadow: 2px 2px 10px #000; font-size: 45px; }
+    p { text-align: center; font-size: 18px; color: #ccc; }
+    .stButton>button {
+        width: 100%; border-radius: 20px; height: 60px;
+        background: linear-gradient(45deg, #FF4B4B, #ff8a05);
+        color: white; font-weight: bold; font-size: 18px; border: none;
+        transition: 0.3s; box-shadow: 0px 4px 15px rgba(255, 75, 75, 0.4);
     }
-    div.stButton > button:hover {
-        background-color: #FF4B4B;
-        color: white;
-    }
+    .stButton>button:hover { transform: scale(1.02); box-shadow: 0px 6px 20px rgba(255, 75, 75, 0.6); }
     </style>
     """, unsafe_allow_html=True)
 
 st.markdown("<h1>👑 GODKING DOWNLOADER 👑</h1>", unsafe_allow_html=True)
-st.markdown("<p>Download Video & Music from YouTube, FB, TikTok, IG</p>", unsafe_allow_html=True)
+st.markdown("<p>Download Video & Music from YouTube, Facebook, TikTok, Instagram</p>", unsafe_allow_html=True)
 
-# ប្រអប់ដាក់ Link
-url = st.text_input("", placeholder="បិទភ្ជាប់ Link ទីនេះ (YT, FB, TikTok, IG...)", label_visibility="collapsed")
+url = st.text_input("", placeholder="បិទភ្ជាប់ Link នៅទីនេះ (YT, FB, TikTok...)", label_visibility="collapsed")
 
-# មុខងារទាញយកមេ
-def download_process(link, is_audio=False):
+# មុខងារ Bypass YouTube & Every Platform
+def godking_engine(link, type='video'):
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
         'nocheckcertificate': True,
+        '#': 'Bypass YouTube IP Block',
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-us,en;q=0.5',
         }
     }
-    
-    if is_audio:
+
+    if type == 'music':
         ydl_opts.update({
             'format': 'bestaudio/best',
             'outtmpl': 'godking_music.mp3',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
+            'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
         })
-        file_name = "godking_music.mp3"
+        return "godking_music.mp3"
     else:
         ydl_opts.update({
             'format': 'best',
             'outtmpl': 'godking_video.mp4',
         })
-        file_name = "godking_video.mp4"
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([link])
-    return file_name
+        return "godking_video.mp4"
 
 col1, col2 = st.columns(2)
 
@@ -72,12 +60,14 @@ with col1:
         if url:
             try:
                 with st.spinner("⏳ កំពុងទាញយក Video..."):
-                    file = download_process(url, is_audio=False)
+                    file = godking_engine(url, 'video')
+                    with yt_dlp.YoutubeDL({'quiet': True, 'outtmpl': 'godking_video.mp4'}) as ydl:
+                        ydl.download([url])
                     with open(file, "rb") as f:
                         st.download_button("📥 Save Video", f, file, "video/mp4")
                     os.remove(file)
             except:
-                st.error("❌ បរាជ័យ! ប្រហែល Link ខុស ឬ IP ត្រូវបាន Block")
+                st.error("❌ YouTube Blocked IP! សូមធ្វើតាមជំហាន 'ប្ដូរផ្ទះថ្មី' ខាងក្រោម!")
         else: st.warning("សូមដាក់ Link!")
 
 with col2:
@@ -85,13 +75,15 @@ with col2:
         if url:
             try:
                 with st.spinner("⏳ កំពុងបំប្លែងជា MP3..."):
-                    file = download_process(url, is_audio=True)
+                    file = godking_engine(url, 'music')
+                    with yt_dlp.YoutubeDL({'quiet': True, 'outtmpl': 'godking_music', 'postprocessors': [{'key': 'FFmpegExtractAudio','preferredcodec': 'mp3'}]}) as ydl:
+                        ydl.download([url])
                     with open(file, "rb") as f:
                         st.download_button("📥 Save MP3", f, file, "audio/mpeg")
                     os.remove(file)
             except:
-                st.error("❌ បរាជ័យ! សូមពិនិត្យមើល packages.txt")
+                st.error("❌ បរាជ័យ! សូមពិនិត្យ packages.txt (ffmpeg)")
         else: st.warning("សូមដាក់ Link!")
 
 st.markdown("---")
-st.markdown("<p style='font-size: 12px; color: gray;'>Powered by GODKING • 2026</p>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: 12px; color: #777;'>Powered by GODKING • 2026</p>", unsafe_allow_html=True)
