@@ -1,27 +1,23 @@
-import streamlit as st
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse, RedirectResponse
 import yt_dlp
-import os
 
-st.set_page_config(page_title="GODKING DOWNLOADER", page_icon="👑")
-st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>👑 GODKING DOWNLOADER 👑</h1>", unsafe_allow_html=True)
+app = FastAPI()
 
-url = st.text_input("", placeholder="បិទភ្ជាប់ Link YouTube, Facebook ឬ TikTok...")
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    return "<h1>GodKing Downloader is Running!</h1>"
 
-# ការកំណត់ពិសេសបំផុតដោយប្រើ Cookies
-YDL_OPTIONS = {
-    'quiet': True,
-    'cookiefile': 'cookies.txt',  # សំខាន់បំផុត៖ ប្រើ Cookies ដើម្បីបន្លំជាមនុស្ស
-    'no_warnings': True,
-    'nocheckcertificate': True,
-    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-}
-
-if st.button("🚀 DOWNLOAD NOW"):
-    if url:
-        try:
-            with st.spinner("⏳ កំពុងប្រើ Cookies ដើម្បីទម្លុះ YouTube..."):
-                with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
-                    ydl.download([url])
-                st.success("✅ ជោគជ័យ! YouTube គិតថាលោកជាមនុស្សពិត។")
-        except Exception as e:
-            st.error("❌ YouTube នៅតែ Block! សូម Update ឯកសារ cookies.txt ថ្មី។")
+@app.get("/download")
+def download(url: str):
+    ydl_opts = {
+        'format': 'best',
+        'quiet': True,
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+    }
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            return RedirectResponse(url=info['url'])
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
