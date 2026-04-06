@@ -14,26 +14,21 @@ async def home():
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>GodKing Downloader v2</title>
         <style>
-            body { font-family: 'Khmer OS Battambang', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #0f0f0f; color: white; margin: 0; }
-            .card { background: #1e1e1e; padding: 30px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-            h2 { margin-top: 0; color: #ff0050; text-transform: uppercase; letter-spacing: 2px; }
-            p { color: #aaa; font-size: 14px; }
-            input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
-            input:focus { border-color: #ff0050; }
-            button { width: 100%; padding: 15px; background: #ff0050; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+            body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #000; color: white; margin: 0; }
+            .card { background: #111; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #ff0050; }
+            h2 { color: #ff0050; margin-bottom: 20px; }
+            input { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 10px; border: none; background: #222; color: white; }
+            button { width: 100%; padding: 15px; background: #ff0050; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
             button:hover { background: #00f2ea; color: black; }
-            .footer { margin-top: 20px; font-size: 12px; color: #555; }
         </style>
     </head>
     <body>
         <div class="card">
-            <h2>GodKing v2</h2>
-            <p>ទាញយកវីដេអូ TikTok (No Watermark) & YouTube</p>
+            <h2>GodKing Downloader</h2>
             <form action="/download" method="get">
-                <input type="text" name="url" placeholder="ផាស Link វីដេអូនៅទីនេះ..." required>
-                <button type="submit">ទាញយកឥឡូវនេះ</button>
+                <input type="text" name="url" placeholder="ផាស Link TikTok ឬ YouTube..." required>
+                <button type="submit">ទាញយក (Download)</button>
             </form>
-            <div class="footer">Powered by yt-dlp & FastAPI</div>
         </div>
     </body>
     </html>
@@ -41,25 +36,24 @@ async def home():
 
 @app.get("/download")
 def download(url: str):
-    # ការកំណត់ដើម្បីដោនឡូត TikTok កុំឱ្យជាប់ Watermark និង YouTube កុំឱ្យ Block
     ydl_opts = {
-        'format': 'best', # ជ្រើសរើសគុណភាពល្អបំផុតដែលគ្មាន Watermark សម្រាប់ TikTok
+        'format': 'best', 
         'quiet': True,
         'no_warnings': True,
-        'cookiefile': 'cookies.txt', # ប្រើ Cookies ដើម្បីកុំឱ្យ YouTube ចាប់ថាជា Bot
+        'cookiefile': 'cookies.txt', # ចាំបាច់បំផុតសម្រាប់ YouTube
         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
     }
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
+            # សម្រាប់ TikTok វានឹងស្វែងរក Link ណាដែលគ្មាន Watermark ឱ្យអូតូ
             video_url = info.get('url')
             
             if not video_url:
-                raise HTTPException(status_code=404, detail="រកមិនឃើញ Link វីដេអូឡើយ")
+                raise HTTPException(status_code=404, detail="រកមិនឃើញវីដេអូទេ")
 
-            # បញ្ជូនអ្នកប្រើទៅកាន់ Link វីដេអូផ្ទាល់ដែលគ្មាន Watermark
             return RedirectResponse(url=video_url)
             
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Error: {str(e)}")
