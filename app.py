@@ -2,34 +2,37 @@ import streamlit as st
 import yt_dlp
 import os
 
-st.set_page_config(page_title="GODKING DOWNLOADER", page_icon="👑")
+st.set_page_config(page_title="GODKING MUSIC", page_icon="🎵")
 
-st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>👑 GODKING DOWNLOADER 👑</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>🎵 GODKING MUSIC 🎵</h1>", unsafe_allow_html=True)
 
-url = st.text_input("", placeholder="បិទភ្ជាប់ Link YouTube/TikTok នៅទីនេះ...")
+url = st.text_input("", placeholder="បិទភ្ជាប់ Link YouTube នៅទីនេះ...")
 
-# ការកំណត់ពិសេសដើម្បី Bypass YouTube Block
+# ការកំណត់ពិសេសដើម្បី Bypass YouTube ជំនាន់ចុងក្រោយ
 YDL_OPTIONS = {
     'format': 'bestaudio/best',
     'quiet': True,
     'no_warnings': True,
     'nocheckcertificate': True,
-    'add_header': [
-        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language: en-us,en;q=0.5',
-        'Sec-Fetch-Mode: navigate',
-    ],
+    'extract_flat': False,
+    'ext': 'mp3',
+    # បន្ថែមបច្ចេកទេសបន្លំខ្លួនជា Android App
+    'youtube_include_dash_manifest': False,
+    'http_headers': {
+        'User-Agent': 'Mozilla/5.0 (Android 14; Mobile; rv:120.0) Gecko/120.0 Firefox/120.0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+    },
 }
 
-if st.button("🎵 DOWNLOAD MP3"):
+if st.button("🚀 ទាញយក MP3"):
     if url:
         try:
-            with st.spinner("⏳ កំពុងវាយលុកប្រព័ន្ធ YouTube... សូមរង់ចាំ"):
-                # កែសម្រួលសម្រាប់ MP3
+            with st.spinner("⏳ កំពុងទម្លុះប្រព័ន្ធ YouTube... សូមរង់ចាំបន្តិច"):
+                output_file = 'song.mp3'
                 opts = YDL_OPTIONS.copy()
                 opts.update({
-                    'outtmpl': 'song.mp3',
+                    'outtmpl': 'song',
                     'postprocessors': [{
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
@@ -42,11 +45,12 @@ if st.button("🎵 DOWNLOAD MP3"):
                 
                 if os.path.exists("song.mp3"):
                     with open("song.mp3", "rb") as f:
-                        st.download_button("📥 ចុចទីនេះដើម្បីរក្សាទុក MP3", f, "godking_music.mp3")
+                        st.download_button("📥 រក្សាទុកក្នុងម៉ាស៊ីន (Save MP3)", f, "godking_music.mp3")
                     os.remove("song.mp3")
+                    st.success("🎉 រួចរាល់! លោកអធិរាជអាចរក្សាទុកបានហើយ")
                 else:
-                    st.error("❌ មិនអាចបំប្លែងបាន! សូម Reboot App ក្នុង Streamlit Dashboard")
+                    st.error("❌ បញ្ហា FFmpeg: សូមចុច Reboot App ក្នុង Streamlit Dashboard ម្ដងទៀត!")
         except Exception as e:
-            st.error("❌ YouTube កំពុងរឹតបន្តឹងខ្លាំង! សូមព្យាយាម Reboot App ឬប្តូរ Link ថ្មី។")
+            st.error("❌ YouTube នៅតែទប់ស្កាត់! សូមព្យាយាមប្តូរ Link ផ្សេង ឬ Reboot App ថ្មី។")
     else:
         st.warning("⚠️ សូមដាក់ Link ជាមុនសិន!")
