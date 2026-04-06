@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 import yt_dlp
 
@@ -6,7 +6,19 @@ app = FastAPI()
 
 @app.get("/", response_class=HTMLResponse)
 async def home():
-    return "<h1>GodKing Downloader is Running!</h1>"
+    # កូដ HTML នេះសម្រាប់បង្កើតរូបរាងវេបសាយ
+    return """
+    <html>
+        <head><title>GodKing Downloader</title></head>
+        <body style="text-align: center; font-family: sans-serif; padding-top: 50px;">
+            <h1>GodKing Video Downloader</h1>
+            <form action="/download" method="get">
+                <input type="text" name="url" placeholder="ផាស Link វីដេអូនៅទីនេះ..." style="width: 300px; padding: 10px;">
+                <button type="submit" style="padding: 10px; background: #007bff; color: white; border: none; cursor: pointer;">ទាញយក</button>
+            </form>
+        </body>
+    </html>
+    """
 
 @app.get("/download")
 def download(url: str):
