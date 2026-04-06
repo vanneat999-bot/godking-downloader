@@ -5,48 +5,44 @@ import os
 st.set_page_config(page_title="GODKING DOWNLOADER", page_icon="👑")
 
 st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>👑 GODKING DOWNLOADER 👑</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>សាកល្បងដោនឡូតពី YouTube, Facebook, TikTok</p>", unsafe_allow_html=True)
 
-url = st.text_input("", placeholder="បិទភ្ជាប់ Link ទីនេះ...")
+url = st.text_input("", placeholder="បិទភ្ជាប់ Link YouTube, Facebook ឬ TikTok...")
 
-# ការកំណត់មហាសាលសម្រាប់ Bypass គ្រប់ Platform
-YDL_OPTIONS = {
-    'quiet': True,
-    'no_warnings': True,
-    'nocheckcertificate': True,
-    # បច្ចេកទេសបន្លំជា App ទូរស័ព្ទ (ជួយឱ្យ FB និង YT ដើរ)
-    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-    'referer': 'https://www.google.com/',
-    'extract_flat': False,
-}
-
-def godking_download(link, mode):
-    # កូដសម្គាល់ឈ្មោះ File កុំឱ្យជាន់គ្នា
-    filename = "godking_media"
-    opts = YDL_OPTIONS.copy()
+# មុខងារ Bypass ជំនាន់ចុងក្រោយ ២០២៦
+def godking_super_download(link, is_music=False):
+    filename = "godking_output"
     
-    if mode == 'music':
-        opts.update({
+    ydl_opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'nocheckcertificate': True,
+        # បច្ចេកទេសបន្លំខ្លួនជា Web Browser ពិតប្រាកដ
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Connection': 'keep-alive',
+        },
+    }
+
+    if is_music:
+        ydl_opts.update({
             'format': 'bestaudio/best',
             'outtmpl': f'{filename}.%(ext)s',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
+            'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
         })
+        final_file = f"{filename}.mp3"
     else:
-        # សម្រាប់ Video យកកម្រិតដែលល្អបំផុតដែលអាចដោនបាន
-        opts.update({
-            'format': 'bestvideo+bestaudio/best',
+        # បង្ខំយក Video ដែលមានរូបភាព និងសំឡេងស្រាប់ (បន្លំ YouTube)
+        ydl_opts.update({
+            'format': 'best[ext=mp4]/best',
             'outtmpl': f'{filename}.mp4',
-            'merge_output_format': 'mp4',
         })
-    
-    with yt_dlp.YoutubeDL(opts) as ydl:
+        final_file = f"{filename}.mp4"
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([link])
-    
-    return f"{filename}.mp3" if mode == 'music' else f"{filename}.mp4"
+    return final_file
 
 col1, col2 = st.columns(2)
 
@@ -54,13 +50,13 @@ with col1:
     if st.button("🎬 DOWNLOAD VIDEO"):
         if url:
             try:
-                with st.spinner("⏳ កំពុងទាញយក Video... (Support FB & YT)"):
-                    file_path = godking_download(url, 'video')
-                    with open(file_path, "rb") as f:
-                        st.download_button("📥 Save Video", f, file_path)
-                    os.remove(file_path)
-            except Exception as e:
-                st.error("❌ YouTube/FB ទប់ស្កាត់! សូមព្យាយាម 'Delete App' រួច 'Deploy ថ្មី'")
+                with st.spinner("⏳ កំពុងទម្លុះប្រព័ន្ធ YouTube..."):
+                    path = godking_super_download(url, is_music=False)
+                    with open(path, "rb") as f:
+                        st.download_button("📥 Save Video", f, path)
+                    os.remove(path)
+            except Exception:
+                st.error("❌ YouTube Block IP នេះ! សូមធ្វើតាមជំហាន 'ប្តូរផ្ទះថ្មី' ខាងក្រោម!")
         else: st.warning("សូមដាក់ Link!")
 
 with col2:
@@ -68,10 +64,10 @@ with col2:
         if url:
             try:
                 with st.spinner("⏳ កំពុងបំប្លែងជា MP3..."):
-                    file_path = godking_download(url, 'music')
-                    with open(file_path, "rb") as f:
-                        st.download_button("📥 Save MP3", f, file_path)
-                    os.remove(file_path)
-            except Exception as e:
-                st.error("❌ បរាជ័យ! សូមឆែកមើល packages.txt")
+                    path = godking_super_download(url, is_music=True)
+                    with open(path, "rb") as f:
+                        st.download_button("📥 Save MP3", f, path)
+                    os.remove(path)
+            except Exception:
+                st.error("❌ បរាជ័យ! សូមពិនិត្យ packages.txt")
         else: st.warning("សូមដាក់ Link!")
